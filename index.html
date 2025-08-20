@@ -58,6 +58,15 @@ input:disabled { background:#e0e0e0; }
 .overlay { position:absolute; bottom:0; width:100%; background: rgba(0,0,0,0.6); color:white; padding:20px; box-sizing:border-box; font-size:20px; }
 .close-btn { position:absolute; top:20px; right:20px; background: rgba(255,255,255,0.8); color:#1976d2; border:none; border-radius:50%; font-size:24px; width:50px; height:50px; cursor:pointer; }
 </style>
+<link rel="manifest" href="manifest.json">
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js")
+      .then(() => console.log("Service Worker enregistré !"))
+      .catch(err => console.error("Erreur Service Worker:", err));
+  }
+</script>
+
 </head>
 <body>
 <header>Calcul Filetage & Pige</header>
