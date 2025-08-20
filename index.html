@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calcul Filetage & Pige - Historique Persistant</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<style>
+html, body { margin:0; padding:0; font-family:'Roboto',sans-serif; background:#f5f5f5; }
+header { background:#1976d2; color:white; text-align:center; padding:20px 0; font-size:22px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2);}
+.container { padding:15px; max-width:480px; margin:auto; }
+label { font-weight:bold; margin-top:10px; display:block; }
+input, select, button { width: 100%; margin: 5px 0; padding: 14px; font-size: 16px; border-radius: 12px; border: 1px solid #ccc; box-sizing: border-box; height: 52px; }
+button { border: none; cursor: pointer; font-weight: bold; transition: 0.3s; }
+input:disabled { background:#e0e0e0; }
+.btn-calc { background:#1976d2; color:white; }
+.btn-calc:hover { background:#1565c0; }
+.btn-reset { background:#f44336; color:white; }
+.btn-reset:hover { background:#d32f2f; }
+.btn-pige { background:#4caf50; color:white; }
+.btn-pige:hover { background:#388e3c; }
+.result-card { margin-top:20px; background:white; padding:20px; border-radius:16px; box-shadow:0 3px 8px rgba(0,0,0,0.25); font-size:18px; line-height:1.6; transition:0.3s; text-align:center; }
+.result-card .big { font-size:28px; font-weight:bold; color:#1976d2; }
+
+/* Historique */
+.history { margin-top:15px; max-height:250px; overflow-y:auto; background:#fff; padding:10px; border-radius:12px; box-shadow:0 3px 6px rgba(0,0,0,0.2); }
+/* ✅ Alignement propre + ellipsis */
+.history div {
+  border-bottom:1px solid #ccc;
+  padding:8px 5px;
+  font-size:14px;
+  border-radius:8px;
+  margin-bottom:3px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.history div:hover { background:#e3f2fd; }
+.history span.entry-text {
+  flex:1;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.history span.delete-btn {
+  cursor:pointer;
+  color:red;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:24px;
+  height:24px;
+  line-height:1;
+}
+
+.fullscreen-result { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1976d2; color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; text-align: center; }
+.fullscreen-result .large { font-weight:bold; margin:10px 0; white-space:nowrap; }
+.overlay { position:absolute; bottom:0; width:100%; background: rgba(0,0,0,0.6); color:white; padding:20px; box-sizing:border-box; font-size:20px; }
+.close-btn { position:absolute; top:20px; right:20px; background: rgba(255,255,255,0.8); color:#1976d2; border:none; border-radius:50%; font-size:24px; width:50px; height:50px; cursor:pointer; }
+</style>
+</head>
+<body>
+<header>Calcul Filetage & Pige</header>
+<div class="container">
+
+  <label for="presetM">Choisir un filetage :</label>
+  <select id="presetM" onchange="appliquerPreset()">
+    <option value="">-- Sélectionner --</option>
+    <option value="M6">M6</option>
+    <option value="M8">M8</option>
+    <option value="M10">M10</option>
+    <option value="M12">M12</option>
+    <option value="M14">M14</option>
+    <option value="M16">M16</option>
+    <option value="M20">M20</option>
+  </select>
+
+  <label>Filetage M :</label>
+  <input type="number" id="M" step="0.001" placeholder="Ex: 12">
+
+  <label>Pas P (mm) :</label>
+  <input type="number" id="P" step="0.001" placeholder="Ex: 1.25">
+
+  <label>Diamètre majeur max :</label>
+  <input type="number" id="dmajmax" step="0.001">
+
+  <label>Diamètre majeur min :</label>
+  <input type="number" id="dmajmin" step="0.001">
+
+  <label>Emax (mm) :</label>
+  <input type="number" id="Emax" step="0.001">
+
+  <label>Emin (mm) :</label>
+  <input type="number" id="Emin" step="0.001">
+
+  <label>Nombre de fils de pige :</label>
+  <input type="number" id="nb_pige" value="3" min="1" max="5">
+
+  <label>Diamètre de fil de pige (mm) :</label>
+  <input type="number" id="w" step="0.001" placeholder="Laisser vide pour calcul automatique">
+  <button class="btn-pige" onclick="calculerPige()">Calculer la pige (W = 0,57735 × P)</button>
+
+  <button class="btn-calc" onclick="calculer()">Calculer</button>
+  <button class="btn-reset" onclick="resetForm()">Réinitialiser</button>
+  <button class="btn-reset" onclick="supprimerHistorique()">Supprimer historique</button>
+
+  <div class="result-card" id="result">Entrez les valeurs pour calculer.</div>
+
+  <h3>Historique :</h3>
+  <div class="history" id="history"></div>
+</div>
+
+<div id="fullscreenResult" class="fullscreen-result" style="display:none;">
+  <button class="close-btn" onclick="fermerResult()">×</button>
+  <div id="MmaxDisplay" class="large"></div>
+  <div id="MminDisplay" class="large"></div>
+  <div class="overlay" id="overlayInfo"></div>
+</div>
+
+<script>
+/* --- Ajustement automatique police --- */
+function ajusterTailleTexte(el) {
+  let parentWidth = el.parentElement.offsetWidth - 40;
+  let fontSize = 10;
+  el.style.fontSize = fontSize + "px";
+  while (el.scrollWidth < parentWidth && fontSize < 500) {
+    fontSize += 2;
+    el.style.fontSize = fontSize + "px";
+  }
+  if (el.scrollWidth > parentWidth) {
+    fontSize -= 2;
+    el.style.fontSize = fontSize + "px";
+  }
+}
+
+/* --- Calcul pige --- */
+function calculerPige(){
+  const P = parseFloat(document.getElementById('P').value);
+  if(isNaN(P)){
+    alert("Veuillez renseigner le pas P avant de calculer la pige.");
+    return;
+  }
+  const w = (0.57735 * P).toFixed(3);
+  document.getElementById('w').value = w;
+  return parseFloat(w);
+}
+
+/* --- Calcul principal --- */
+function calculer(){
+  const M = parseFloat(document.getElementById('M').value);
+  const P = parseFloat(document.getElementById('P').value);
+  const Emax = parseFloat(document.getElementById('Emax').value);
+  const Emin = parseFloat(document.getElementById('Emin').value);
+  const nb = parseInt(document.getElementById('nb_pige').value);
+  let wInput = document.getElementById('w').value;
+  let w;
+  let wAuto = false;
+
+  if(isNaN(M) || isNaN(P) || isNaN(Emax) || isNaN(Emin) || isNaN(nb)){
+    alert("Veuillez remplir tous les champs obligatoires !");
+    return;
+  }
+
+  if(!wInput){
+    w = calculerPige();
+    wAuto = true;
+  } else {
+    w = parseFloat(wInput);
+  }
+
+  const constante = nb*w - 0.8660254*P;
+  const Mmax = (Emax + constante).toFixed(3);
+  const Mmin = (Emin + constante).toFixed(3);
+
+  let dmajmax = document.getElementById('dmajmax').value;
+  let dmajmin = document.getElementById('dmajmin').value;
+  dmajmax = dmajmax ? parseFloat(dmajmax).toFixed(3) : M.toFixed(3);
+  dmajmin = dmajmin ? parseFloat(dmajmin).toFixed(3) : (M - 0.072).toFixed(3);
+
+  document.getElementById('result').innerHTML =
+    `<div class="big">Mmax: ${Mmax} mm</div>` +
+    `<div class="big">Mmin: ${Mmin} mm</div>` +
+    `<strong>Diamètre de fil de pige ≈</strong> ${w} mm ${wAuto ? '(calculé automatiquement)' : ''}<br>` +
+    `<strong>Diamètre majeur max ≈</strong> ${dmajmax} mm<br>` +
+    `<strong>Diamètre majeur min ≈</strong> ${dmajmin} mm<br>` +
+    `<strong>Nombre de fils de pige :</strong> ${nb}`;
+
+  document.getElementById('MmaxDisplay').innerText = "Mmax : " + Mmax + " mm";
+  document.getElementById('MminDisplay').innerText = "Mmin : " + Mmin + " mm";
+
+  document.getElementById('overlayInfo').innerHTML =
+    `<strong>Diamètre de fil de pige ≈</strong> ${w} mm ${wAuto ? '(calculé automatiquement)' : ''}<br>` +
+    `<strong>Diamètre majeur max ≈</strong> ${dmajmax} mm<br>` +
+    `<strong>Diamètre majeur min ≈</strong> ${dmajmin} mm<br>` +
+    `<strong>Nombre de fils de pige :</strong> ${nb}`;
+
+  const item = {M,P,w,nb,Emax,Emin,dmajmax,dmajmin,Mmax,Mmin,wAuto};
+  ajouterHistoriqueDOM(item, true);
+}
+
+/* --- Historique --- */
+function chargerHistorique(){
+  const data = JSON.parse(localStorage.getItem('historique')) || [];
+  data.forEach(item => ajouterHistoriqueDOM(item, false));
+}
+function sauvegarderHistorique(item){
+  const data = JSON.parse(localStorage.getItem('historique')) || [];
+  data.unshift(item);
+  localStorage.setItem('historique', JSON.stringify(data));
+}
+function supprimerHistorique(){
+  if(confirm("Supprimer tout l'historique ?")){
+    localStorage.removeItem('historique');
+    document.getElementById('history').innerHTML = '';
+  }
+}
+function supprimerUneEntree(item){
+  let data = JSON.parse(localStorage.getItem('historique')) || [];
+  data = data.filter(h => !(
+    h.M === item.M &&
+    h.P === item.P &&
+    h.w === item.w &&
+    h.nb === item.nb &&
+    h.Emax === item.Emax &&
+    h.Emin === item.Emin &&
+    h.dmajmax === item.dmajmax &&
+    h.dmajmin === item.dmajmin
+  ));
+  localStorage.setItem('historique', JSON.stringify(data));
+}
+function ajouterHistoriqueDOM(item, sauvegarder=true){
+  const historyDiv = document.getElementById('history');
+  const data = JSON.parse(localStorage.getItem('historique')) || [];
+
+  const existe = data.some(h =>
+    h.M === item.M && h.P === item.P && h.w === item.w &&
+    h.nb === item.nb && h.Emax === item.Emax && h.Emin === item.Emin &&
+    h.dmajmax === item.dmajmax && h.dmajmin === item.dmajmin
+  );
+  if (existe && sauvegarder) return;
+
+  const entry = document.createElement('div');
+  entry.dataset.info = JSON.stringify(item);
+
+  const textSpan = document.createElement('span');
+  textSpan.className = 'entry-text'; // ✅ pour l’alignement
+  textSpan.innerHTML = `M${item.M} P: ${item.P} → w≈ ${item.w} ${item.wAuto ? '(auto)' : ''} | Mmax: ${item.Mmax} / Mmin: ${item.Mmin}`;
+  textSpan.style.cursor = "pointer";
+
+  textSpan.onclick = function(){
+    const data = JSON.parse(entry.dataset.info);
+    document.getElementById('M').value = data.M;
+    document.getElementById('P').value = data.P;
+    document.getElementById('w').value = data.w;
+    document.getElementById('nb_pige').value = data.nb;
+    document.getElementById('Emax').value = data.Emax;
+    document.getElementById('Emin').value = data.Emin;
+    document.getElementById('dmajmax').value = data.dmajmax;
+    document.getElementById('dmajmin').value = data.dmajmin;
+    calculer();
+  };
+
+  const deleteBtn = document.createElement('span');
+  deleteBtn.innerHTML = "❌";
+  deleteBtn.className = "delete-btn";
+  deleteBtn.onclick = function(e){
+    e.stopPropagation();
+    supprimerUneEntree(item);
+    entry.remove();
+  };
+
+  entry.appendChild(textSpan);
+  entry.appendChild(deleteBtn);
+
+  historyDiv.prepend(entry);
+
+  if(sauvegarder) sauvegarderHistorique(item);
+}
+
+/* --- Reset & plein écran --- */
+function resetForm(){
+  document.getElementById('M').value = '';
+  document.getElementById('P').value = '';
+  document.getElementById('Emax').value = '';
+  document.getElementById('Emin').value = '';
+  document.getElementById('dmajmax').value = '';
+  document.getElementById('dmajmin').value = '';
+  document.getElementById('w').value = '';
+  document.getElementById('nb_pige').value = 3;
+  document.getElementById('result').innerHTML = 'Entrez les valeurs pour calculer.';
+}
+function fermerResult(){
+  const fs = document.getElementById('fullscreenResult');
+  fs.style.opacity = 1;
+  const fadeOut = setInterval(()=>{
+    fs.style.opacity -= 0.05;
+    if(fs.style.opacity <= 0){
+      fs.style.display = 'none';
+      clearInterval(fadeOut);
+    }
+  }, 15);
+}
+
+/* --- Redimensionnement automatique --- */
+window.addEventListener("resize", () => {
+  ajusterTailleTexte(document.getElementById("MmaxDisplay"));
+  ajusterTailleTexte(document.getElementById("MminDisplay"));
+});
+
+/* --- Initialisation --- */
+window.onload = chargerHistorique;
+const presets = {
+  "M6":  {M:6,  P:1,    dmajmax:5.974,   dmajmin:5.794,  Emax:5.324,  Emin:5.212,  W:0.6},
+  "M8":  {M:8,  P:1.25, dmajmax:7.972,   dmajmin:7.760,  Emax:7.160,  Emin:7.042,  W:0.75},
+  "M10": {M:10, P:1.5,  dmajmax:9.968,   dmajmin:9.732,  Emax:8.994,  Emin:8.862,  W:0.8},
+  "M12": {M:12, P:1.75, dmajmax:11.966,  dmajmin:11.701, Emax:10.829, Emin:10.679, W:1},
+  "M14": {M:14, P:2,    dmajmax:13.962,  dmajmin:13.682, Emax:12.663, Emin:12.503, W:1.25},
+  "M16": {M:16, P:2,    dmajmax:15.962,  dmajmin:15.682, Emax:14.663, Emin:14.503, W:1.25},
+  "M20": {M:20, P:2.5,  dmajmax:19.958,  dmajmin:19.623, Emax:18.334, Emin:18.164, W:1.5},
+};
+function appliquerPreset() {
+  const presetKey = document.getElementById('presetM').value;
+  if(presetKey && presets[presetKey]) {
+    const p = presets[presetKey];
+    document.getElementById('M').value = p.M;
+    document.getElementById('P').value = p.P;
+    document.getElementById('dmajmax').value = p.dmajmax;
+    document.getElementById('dmajmin').value = p.dmajmin;
+    document.getElementById('Emax').value = p.Emax;
+    document.getElementById('Emin').value = p.Emin;
+    document.getElementById('w').value = p.W;
+  }
+}
+
+/* --- Affichage plein écran avec ajustement --- */
+document.getElementById('result').onclick = function() {
+  const fs = document.getElementById('fullscreenResult');
+  fs.style.display = 'flex';
+  fs.style.opacity = 1;
+
+  setTimeout(() => {
+    ajusterTailleTexte(document.getElementById("MmaxDisplay"));
+    ajusterTailleTexte(document.getElementById("MminDisplay"));
+  }, 50);
+};
+</script>
+</body>
+</html>
