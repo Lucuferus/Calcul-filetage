@@ -1,13 +1,14 @@
-const CACHE_NAME = "calcul-filetage-auto";
+const CACHE_NAME = "calcul-filetage-vauto-v1";
 const FILES_TO_CACHE = [
   "/",
   "/index.html",
   "/manifest.json",
   "/icons/icon-192.png",
-  "/icons/icon-512.png"
+  "/icons/icon-512.png",
+  "/service-worker.js" // pour se mettre à jour automatiquement
 ];
 
-// Installation du service worker et mise en cache initiale
+// --- INSTALLATION ---
 self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(FILES_TO_CACHE))
@@ -15,33 +16,49 @@ self.addEventListener("install", event => {
   self.skipWaiting(); // activation immédiate
 });
 
-// Activation et suppression des anciens caches
+// --- ACTIVATION ---
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.map(key => {
-        if (key !== CACHE_NAME) return caches.delete(key);
-      }))
+      Promise.all(
+        keys.map(key => {
+          if (key !== CACHE_NAME) return caches.delete(key); // supprime anciens caches
+        })
+      )
     )
   );
-  self.clients.claim(); // prend le contrôle des pages immédiatement
+  self.clients.claim();
 });
 
-// Interception des requêtes : stratégie network first pour tous les fichiers
+// --- FETCH ---
 self.addEventListener("fetch", event => {
+  if (!event.request.url.startsWith(self.location.origin)) return;
+
+  // Network-first pour fichiers critiques
+  const networkFirstFiles = ["index.html", "manifest.json", "service-worker.js"];
+  if (networkFirstFiles.some(f => event.request.url.endsWith(f))) {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          return caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, response.clone());
+            return response;
+          });
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Cache-first pour les autres fichiers (images, icônes, CSS)
   event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        // mise à jour du cache
+    caches.match(event.request).then(cachedResponse => {
+      return cachedResponse || fetch(event.request).then(response => {
         return caches.open(CACHE_NAME).then(cache => {
           cache.put(event.request, response.clone());
           return response;
         });
-      })
-      .catch(() => {
-        // si le réseau échoue, retourner la version du cache
-        return caches.match(event.request);
-      })
+      }).catch(() => cachedResponse);
+    })
   );
 });
-
