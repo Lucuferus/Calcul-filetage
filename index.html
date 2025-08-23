@@ -313,6 +313,19 @@ document.getElementById('result').onclick=function(){
 // --- Initialisation ---
 window.onload=function(){chargerHistorique(); afficherListePiges();}
 window.addEventListener("resize",()=>{ajusterTailleTexte(document.getElementById("MmaxDisplay"));ajusterTailleTexte(document.getElementById("MminDisplay"));});
+
+// --- Cache ---
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(reg => {
+        console.log('Service Worker enregistré avec succès:', reg);
+      })
+      .catch(err => {
+        console.error('Erreur d’enregistrement du Service Worker:', err);
+      });
+  });
+}
 </script>
 </body>
 </html>
