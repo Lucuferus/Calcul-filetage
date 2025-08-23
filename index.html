@@ -125,16 +125,29 @@ function ouvrirOnglet(evt, nomOnglet){
 
 // --- Liste des piges disponibles ---
 const pigesDisponibles = [
-  {nom:"Pige 1", diam:3, longueur:50},
-  {nom:"Pige 2", diam:4, longueur:60},
-  {nom:"Pige 3", diam:5, longueur:70}
+  {nom:"Pige 0.018", diam:3, pas:50},
+  {nom:"Pige 0.024", diam:4, pas:60},
+  {nom:"Pige 0.029", diam:5, pas:70}
+  {nom:"Pige 0.032", diam:3, pas:50},
+  {nom:"Pige 0.040", diam:3, pas:50},
+  {nom:"Pige 0.045", diam:3, pas:50},
+  {nom:"Pige 0.055", diam:3, pas:50},
+  {nom:"Pige 0.063", diam:3, pas:50},
+  {nom:"Pige 0.072", diam:3, pas:50},
+  {nom:"Pige 0.081", diam:3, pas:50},
+  {nom:"Pige 0.092", diam:3, pas:50},
+  {nom:"Pige 0.108", diam:3, pas:50},
+  {nom:"Pige 0.120", diam:3, pas:50},
+  {nom:"Pige 0.127", diam:3, pas:50},
+  {nom:"Pige 0.143", diam:3, pas:50},
+  {nom:"Pige 0.185", diam:3, pas:50}
 ];
 function afficherListePiges(){
   const ul = document.getElementById("listePiges");
   ul.innerHTML="";
   pigesDisponibles.forEach(p=>{
     const li = document.createElement("li");
-    li.innerHTML=`${p.nom} - Diamètre: ${p.diam} mm, Longueur: ${p.longueur} mm`;
+    li.innerHTML=`${p.nom} - Diamètre: ${p.diam} mm, Pas de: ${p.pas} mm`;
     ul.appendChild(li);
   });
 }
