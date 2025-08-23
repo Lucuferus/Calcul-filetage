@@ -148,7 +148,6 @@ function afficherListePiges(){
   pigesDisponibles.forEach(p=>{
     const li = document.createElement("li");
     li.innerHTML=`${p.nom} - Diamètre: ${p.diam} mm, Pas: ${p.pas.join('/') || 'N/A'} mm`;
-
     ul.appendChild(li);
   });
 }
