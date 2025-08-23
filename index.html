@@ -125,22 +125,22 @@ function ouvrirOnglet(evt, nomOnglet){
 
 // --- Liste des piges disponibles ---
 const pigesDisponibles = [
-  {nom:"Pige 0.018", diam:3, pas:0.5,0.6,0.7,0.75},
-  {nom:"Pige 0.024", diam:4, pas:0.8,1},
-  {nom:"Pige 0.029", diam:5, pas:1.25},
-  {nom:"Pige 0.032", diam:3, pas:},
-  {nom:"Pige 0.040", diam:3, pas:1.5,1.75},
-  {nom:"Pige 0.045", diam:3, pas:2},
-  {nom:"Pige 0.055", diam:3, pas:2.5},
-  {nom:"Pige 0.063", diam:3, pas:3},
-  {nom:"Pige 0.072", diam:3, pas:},
-  {nom:"Pige 0.081", diam:3, pas:3.5},
-  {nom:"Pige 0.092", diam:3, pas:4},
-  {nom:"Pige 0.108", diam:3, pas:4.5,5},
-  {nom:"Pige 0.120", diam:3, pas:5.5},
-  {nom:"Pige 0.127", diam:3, pas:6},
-  {nom:"Pige 0.143", diam:3, pas:},
-  {nom:"Pige 0.185", diam:3, pas:}
+  {nom:"Pige 0.018", diam:3, pas:[0.5,0.6,0.7,0.75]},
+  {nom:"Pige 0.024", diam:4, pas:[0.8,1]},
+  {nom:"Pige 0.029", diam:5, pas:[1.25]},
+  {nom:"Pige 0.032", diam:3, pas:[]},           // vide si pas inconnu
+  {nom:"Pige 0.040", diam:3, pas:[1.5,1.75]},
+  {nom:"Pige 0.045", diam:3, pas:[2]},
+  {nom:"Pige 0.055", diam:3, pas:[2.5]},
+  {nom:"Pige 0.063", diam:3, pas:[3]},
+  {nom:"Pige 0.072", diam:3, pas:[]},
+  {nom:"Pige 0.081", diam:3, pas:[3.5]},
+  {nom:"Pige 0.092", diam:3, pas:[4]},
+  {nom:"Pige 0.108", diam:3, pas:[4.5,5]},
+  {nom:"Pige 0.120", diam:3, pas:[5.5]},
+  {nom:"Pige 0.127", diam:3, pas:[6]},
+  {nom:"Pige 0.143", diam:3, pas:[]},
+  {nom:"Pige 0.185", diam:3, pas:[]}
 ];
 function afficherListePiges(){
   const ul = document.getElementById("listePiges");
