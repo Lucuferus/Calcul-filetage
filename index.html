@@ -43,23 +43,44 @@ input:disabled { background:#e0e0e0; }
 .tabcontent { display:none; }
 #listePiges { list-style:none; padding:0; }
 #listePiges li {
-  background:#fff;
-  margin:5px 0;
-  padding:6px 14px;      /* réduit haut/bas à 6px au lieu de 14px */
-  border-radius:10px;
-  box-shadow:0 2px 4px rgba(0,0,0,0.15);
-  display:flex;
-  flex-direction:column;   /* <--- pour mettre le texte sur 2 lignes */
-  justify-content:center;
-  font-size:clamp(18px, 2vw, 22px);  /* <--- taille auto selon écran */
-  line-height:1.3;
-  box-sizing:border-box;
-  min-height:50px; /* pour que le carré s’agrandisse */
+  background: #fff;
+  margin: 5px 0;
+  padding: 6px 14px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-size: clamp(18px, 2vw, 22px);
+  line-height: 1.3;
+  box-sizing: border-box;
+  min-height: 50px;
 }
+
+/* Ligne des pas */
 .pige-pas {
+  display: flex;
+  align-items: flex-start;      /* alignement en haut pour plusieurs lignes */
+  gap: 5px;
   font-weight: bold;
-  color: #1976d2; /* bleu */
-  font-size: 1.1em; /* légèrement plus gros que le texte normal */
+  color: #1976d2;
+  flex-wrap: wrap;              /* autorise le retour à la ligne */
+}
+
+.pige-pas span.label {
+  flex-shrink: 0;
+  min-width: 70px;              /* espace pour "Pas de:" */
+  text-align: left;
+}
+
+.pige-pas span.values {
+  flex-grow: 1;
+  white-space: normal;           /* autorise le retour à la ligne */
+  word-break: break-word;        /* coupe si une valeur est trop longue */
+  margin-left: 5px;
+}
+
+te-space: nowrap;    /* empêche le texte de se couper */
 }
 </style>
 <link rel="manifest" href="manifest.json">
@@ -165,10 +186,13 @@ function afficherListePiges(){
   ul.innerHTML="";
   pigesDisponibles.forEach(p=>{
     const li = document.createElement("li");
-    li.innerHTML = `
-      <div class="pige-nom">Pige ${p.nom} - Diamètre: ${p.diam} mm</div>
-      <div class="pige-pas">Pas de: ${p.pas.join(' / ') || 'N/A'}</div>
-    `;
+  li.innerHTML = `
+  <div class="pige-nom">Pige ${p.nom} - Diamètre: ${p.diam} mm</div>
+  <div class="pige-pas">
+    <span class="label">Pas de:</span>
+    <span class="values">${p.pas.length ? p.pas.join(' / ') : 'N/A'}</span>
+  </div>
+`;
     ul.appendChild(li);
   });
 }
