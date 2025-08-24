@@ -358,23 +358,23 @@
 
     // --- Liste des piges ---
     const pigesDisponibles = [
-      {nom:" 0.018", diam:3, pas:[0.5,0.6,0.7,0.75]},
-      {nom:" 0.024", diam:4, pas:[0.8,1]},
-      {nom:" 0.029", diam:5, pas:[1.25]},
-      {nom:" 0.032", diam:3, pas:[]},
-      {nom:" 0.040", diam:3, pas:[1.5,1.75]},
-      {nom:" 0.045", diam:3, pas:[2]},
-      {nom:" 0.055", diam:3, pas:[2.5]},
-      {nom:" 0.063", diam:3, pas:[3]},
-      {nom:" 0.072", diam:3, pas:[]},
-      {nom:" 0.081", diam:3, pas:[3.5]},
-      {nom:" 0.092", diam:3, pas:[4]},
-      {nom:" 0.108", diam:3, pas:[4.5,5]},
-      {nom:" 0.120", diam:3, pas:[5.5]},
-      {nom:" 0.127", diam:3, pas:[6]},
-      {nom:" 0.143", diam:3, pas:[]},
-      {nom:" 0.185", diam:3, pas:[]}
-    ];
+      {nom:"0.018", diam:0.454, pas:[0.5,0.6,0.7,0.75]},
+      {nom:"0.024", diam:0.606, pas:[0.8,1]},
+      {nom:"0.029", diam:0.734, pas:[1.25]},
+      {nom:"0.032", diam:0.808, pas:[]},
+      {nom:"0.040", diam:1.012, pas:[1.5,1.75]},
+      {nom:"0.045", diam:1.140, pas:[2]},
+      {nom:"0.055", diam:1.397, pas:[2.5]},
+      {nom:"0.063", diam:1.600, pas:[3]},
+      {nom:"0.072", diam:1.826, pas:[]},
+      {nom:"0.081", diam:2.056, pas:[3.5]},
+      {nom:"0.092", diam:2.336, pas:[4]},
+      {nom:"0.108", diam:2.742, pas:[4.5,5]},
+      {nom:"0.120", diam:3.048, pas:[5.5]},
+      {nom:"0.127", diam:3.228, pas:[6]},
+      {nom:"0.143", diam:3.629, pas:[]},
+      {nom:"0.185", diam:4.696, pas:[]}
+];
 
     function afficherListePiges(){
       const ul = document.getElementById("listePiges");
@@ -546,13 +546,13 @@
 
     // --- Presets ---
     const presets = {
-      "M6":  {M:6,P:1,dmajmax:5.974,dmajmin:5.794,Emax:5.324,Emin:5.212,W:0.6},
-      "M8":  {M:8,P:1.25,dmajmax:7.972,dmajmin:7.760,Emax:7.160,Emin:7.042,W:0.75},
-      "M10": {M:10,P:1.5,dmajmax:9.968,dmajmin:9.732,Emax:8.994,Emin:8.862,W:0.8},
-      "M12": {M:12,P:1.75,dmajmax:11.966,dmajmin:11.701,Emax:10.829,Emin:10.679,W:1},
-      "M14": {M:14,P:2,dmajmax:13.962,dmajmin:13.682,Emax:12.663,Emin:12.503,W:1.25},
-      "M16": {M:16,P:2,dmajmax:15.962,dmajmin:15.682,Emax:14.663,Emin:14.503,W:1.25},
-      "M20": {M:20,P:2.5,dmajmax:19.958,dmajmin:19.623,Emax:18.334,Emin:18.164,W:1.5},
+      "M6":  {M:6,P:1,dmajmax:5.974,dmajmin:5.794,Emax:5.324,Emin:5.212,W:0.606},
+      "M8":  {M:8,P:1.25,dmajmax:7.972,dmajmin:7.760,Emax:7.160,Emin:7.042,W:0.734},
+      "M10": {M:10,P:1.5,dmajmax:9.968,dmajmin:9.732,Emax:8.994,Emin:8.862,W:1.012},
+      "M12": {M:12,P:1.75,dmajmax:11.966,dmajmin:11.701,Emax:10.829,Emin:10.679,W:1.012},
+      "M14": {M:14,P:2,dmajmax:13.962,dmajmin:13.682,Emax:12.663,Emin:12.503,W:1.140},
+      "M16": {M:16,P:2,dmajmax:15.962,dmajmin:15.682,Emax:14.663,Emin:14.503,W:1.140},
+      "M20": {M:20,P:2.5,dmajmax:19.958,dmajmin:19.623,Emax:18.334,Emin:18.164,W:1.397},,
     };
 
     function appliquerPreset(){
