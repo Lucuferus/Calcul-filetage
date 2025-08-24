@@ -42,7 +42,25 @@ input:disabled { background:#e0e0e0; }
 .tablink:hover { background:#1565c0; color:white; }
 .tabcontent { display:none; }
 #listePiges { list-style:none; padding:0; }
-#listePiges li { background:#fff; margin:5px 0; padding:14px; border-radius:10px; box-shadow:0 2px 4px rgba(0,0,0,0.15); height:52px; line-height:52px; display:flex; align-items:center; font-size:20px; box-sizing:border-box; }
+#listePiges li {
+  background:#fff;
+  margin:5px 0;
+  padding:6px 14px;      /* réduit haut/bas à 6px au lieu de 14px */
+  border-radius:10px;
+  box-shadow:0 2px 4px rgba(0,0,0,0.15);
+  display:flex;
+  flex-direction:column;   /* <--- pour mettre le texte sur 2 lignes */
+  justify-content:center;
+  font-size:clamp(18px, 2vw, 22px);  /* <--- taille auto selon écran */
+  line-height:1.3;
+  box-sizing:border-box;
+  min-height:50px; /* pour que le carré s’agrandisse */
+}
+.pige-pas {
+  font-weight: bold;
+  color: #1976d2; /* bleu */
+  font-size: 1.1em; /* légèrement plus gros que le texte normal */
+}
 </style>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1976d2">
@@ -125,29 +143,32 @@ function ouvrirOnglet(evt, nomOnglet){
 
 // --- Liste des piges disponibles ---
 const pigesDisponibles = [
-  {nom:"Pige 0.018", diam:3, pas:[0.5,0.6,0.7,0.75]},
-  {nom:"Pige 0.024", diam:4, pas:[0.8,1]},
-  {nom:"Pige 0.029", diam:5, pas:[1.25]},
-  {nom:"Pige 0.032", diam:3, pas:[]},           // vide si pas inconnu
-  {nom:"Pige 0.040", diam:3, pas:[1.5,1.75]},
-  {nom:"Pige 0.045", diam:3, pas:[2]},
-  {nom:"Pige 0.055", diam:3, pas:[2.5]},
-  {nom:"Pige 0.063", diam:3, pas:[3]},
-  {nom:"Pige 0.072", diam:3, pas:[]},
-  {nom:"Pige 0.081", diam:3, pas:[3.5]},
-  {nom:"Pige 0.092", diam:3, pas:[4]},
-  {nom:"Pige 0.108", diam:3, pas:[4.5,5]},
-  {nom:"Pige 0.120", diam:3, pas:[5.5]},
-  {nom:"Pige 0.127", diam:3, pas:[6]},
-  {nom:"Pige 0.143", diam:3, pas:[10]},
-  {nom:"Pige 0.185", diam:3, pas:[]}
+  {nom:" 0.018", diam:3, pas:[0.5,0.6,0.7,0.75]},
+  {nom:" 0.024", diam:4, pas:[0.8,1]},
+  {nom:" 0.029", diam:5, pas:[1.25]},
+  {nom:" 0.032", diam:3, pas:[]},           // vide si pas inconnu
+  {nom:" 0.040", diam:3, pas:[1.5,1.75]},
+  {nom:" 0.045", diam:3, pas:[2]},
+  {nom:" 0.055", diam:3, pas:[2.5]},
+  {nom:" 0.063", diam:3, pas:[3]},
+  {nom:" 0.072", diam:3, pas:[]},
+  {nom:" 0.081", diam:3, pas:[3.5]},
+  {nom:" 0.092", diam:3, pas:[4]},
+  {nom:" 0.108", diam:3, pas:[4.5,5]},
+  {nom:" 0.120", diam:3, pas:[5.5]},
+  {nom:" 0.127", diam:3, pas:[6]},
+  {nom:" 0.143", diam:3, pas:[]},
+  {nom:" 0.185", diam:3, pas:[]}
 ];
 function afficherListePiges(){
   const ul = document.getElementById("listePiges");
   ul.innerHTML="";
   pigesDisponibles.forEach(p=>{
     const li = document.createElement("li");
-    li.innerHTML=`${p.nom} - Diamètre: ${p.diam} mm, Pas: ${p.pas.join('/') || 'N/A'} `;
+    li.innerHTML = `
+      <div class="pige-nom">Pige ${p.nom} - Diamètre: ${p.diam} mm</div>
+      <div class="pige-pas">Pas de: ${p.pas.join(' / ') || 'N/A'}</div>
+    `;
     ul.appendChild(li);
   });
 }
@@ -324,6 +345,23 @@ if ('serviceWorker' in navigator) {
       .catch(err => {
         console.error('Erreur d’enregistrement du Service Worker:', err);
       });
+  });
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js').then(reg => {
+    console.log('SW enregistré:', reg);
+
+    // Vérifie périodiquement les mises à jour
+    setInterval(() => {
+      reg.update();
+    }, 60000); // toutes les 60s
+  });
+
+  // Recharge la page quand un nouveau SW prend le contrôle
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    console.log("Nouvelle version du SW active → reload !");
+    window.location.reload();
   });
 }
 </script>
